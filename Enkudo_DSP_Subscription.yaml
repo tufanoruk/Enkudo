@@ -1,0 +1,20 @@
+openapi: '3.0.0'
+info:
+  title: 'Telenity DSP Northbound Subscription API'
+  description: |
+    Enkudo DSP is Telenity’s next-generation digital services platform to monetize the 
+    digital services and content served on top of the customer network. Enkudo DSP solution 
+    enables customers to subscribe/purchase digital content of their choice (ranging from 
+    games, video stream, educational content, etc.) through a mobile application and web 
+    portal with a variety of payment options, on a revenue share business model.
+    This API is for the consumption of Content Providers. It provides end-user subscription, 
+    unsubscription, query information and notification interfaces for DSP. 
+  version: '1.0'
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /subscriibe:
+    post:
+      responses:
+        '200':
+          description: OK
