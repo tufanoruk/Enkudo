@@ -1,0 +1,302 @@
+openapi: '3.0.0'
+info:
+  title: 'Enkudo DSP Northbound OAuth API'
+  description: |
+    Enkudo DSP is Telenity’s next-generation digital services platform to monetize the 
+    digital services and content served on top of the customer network. Enkudo DSP solution 
+    enables customers to subscribe/purchase digital content of their choice (ranging from 
+    games, video stream, educational content, etc.) through a mobile application and web 
+    portal with a variety of payment options, on a revenue share business model.
+    This API is for the consumption of Content Providers. It provides end-user subscription, 
+    unsubscription, query information and notification interfaces for DSP. 
+  version: '1.0'
+servers:
+  - url: 'https://api.enkudo-{customer}.com/v1/oauth'
+    description: Production server
+    variables:
+      customer:
+        default: demo
+        description: enkudo customer name
+  - url: 'https://api-test.enkudo-{customer}.com/v1/oauth'
+    description: Test server
+    variables:
+      customer:
+        default: demo
+        description: enkudo customer name.
+  - url: 'https://localhost:8000/v1/oauth'
+    description: localTest server      
+paths:
+  /token:
+    post:
+      description: |
+        'The API returns an OAuth token when the request body delivers the correct authorisation keys 
+        (ClientID and Secret - base64 encoded), via the _x-www-form-urlencoded_ application method. 
+        <br> <br> 
+        **Note:** for security measures, the Post method is used instead of GET to prevent caching.
+      summary: Grant an OAuth token
+      tags:
+        - OAuth token
+      requestBody:
+        description: |
+          The content type is x-www-form-urlencoded. Within a cURl test, the Client 
+          ID and Secret (base64 encoded) are provided in the cURL line: <br>
+          _--data-urlencode 'grant_type=client_credentials_. <br>
+          For example: 
+          ```curl
+          curl --location --request POST 'https://api-test.shell.com/v1/oauth/token' \
+          --header 'Content-Type: application/x-www-form-urlencoded' \
+          --header 'Authorization: Basic WVlZWVlZWTN4dUdGcGFnVWpTWWJjRnRKdEFBQUFBQUFBOkFBQUE0ZUZVYmtwblpaWlo=' \
+          --header 'Cookie: AWSALB=wiPUb57YAwmMhIvza4uoJZZZZZZZZZZZZZZZWoXmcmPR0kQ/1/LR9dGYf57E3Rvm2X0GPOWhOw4cr+OPeFTtb/nMPMUVVdh+aGkUc6hjICy8hToAQ96kDCmfR0; 
+                    AWSALBAPP-0=_remove_; AWSALBAPP-1=_remove_; AWSALBAPP-2=_remove_; AWSALBAPP-3=_remove_; 
+                    AWSALBCORS=wiPUb57YAwmMhIvza4uoJ/DU4NpMiC+iajWuMwWoXmcmPR0kQ/1/LR9dZZZZZZZZZZZZw4cr+OPeFTtb/nMPMUVVdh+aGkUc6hjICy8hToAQ96kDCmfR0; ROUTE=.api-8666fdd868-pccsc' \
+          --data-urlencode: 'grant_type'='client_credentials'
+              ```        
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                grant_type:
+                  type: string
+                  maxLength: 20
+                  pattern: '^[a-z]$'
+              required:
+                - grant_type
+      responses:
+        '200':
+          description: |
+            Successful return of accessToken. <br><br>
+              ```json
+              {
+                "accessToken": "abcde12345", <br>
+                "refreshToken": "edcba54321", <br>
+                "expiresIn": 899 
+              }
+              ```           
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              examples:
+                example-1:
+                  value:
+                    access_token: NiE3gzPNVFpwYYMyyWu6mGFYtKN5
+                    expires_in(seconds): '899'
+                    token_type: BearerToken
+        '400':
+          description: |
+            'Bad request - The request was not valid. This code is returned when the server has 
+            attempted to process the request, but some aspect of the request is not valid, for 
+            example an incorrectly formatted resource or an attempt to deploy an invalid event 
+            project to the event runtime. 
+            Information about the request is provided in the response body, and includes an error
+            code and error message.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '401':
+          description: | 
+            'Unauthorized request, Missing Authorization header, or expired authorization token 
+            etc. It is returned from the application server when application security is enabled, 
+            and authorization information was missing from the request.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        '403':
+          description: | 
+            'Unauthorized request. The client does not have access rights to the content. 
+            Unlike 401, the client’s identity is known to the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Forbidden'
+        '404':
+          description: 'NotFound - the server can not find the requested resource.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '405':
+          description: | 
+            'Method Not Allowed - the request HTTP method is known by the server but has been disabled 
+            and cannot be used for that resource.''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MethodnotAllowed'
+        '500':
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+      security:
+        - BasicAuth: []
+components:
+  schemas:
+    Success:
+      type: object
+      additionalProperties: false
+      description: |
+        '200 Success - Generated Access Token as response. 
+        <br><br> 
+        Note: The Access Token is only valid for 1h.'
+      x-internal: true
+      x-examples:
+        example-1:
+          access_token: NiE3gzPNVFpwYYMyyWu6mGFYtKN5
+          expires_in(seconds): '3600'
+          token_type: BearerToken
+      title: ''
+      properties:
+        access_token:
+          type: string
+          description: Generated Access Token as response
+          example: NiE3gzPNVFpwYYMyyWu6mGFYtKN5
+        expires_in(seconds):
+          type: string
+          example: '3600'
+        token_type:
+          type: string
+          example: BearerToken
+    BadRequest:
+      type: object
+      additionalProperties: false
+      description: |
+        Request is missing a parameter so the server cannot proceed with the request.
+      properties:
+        fault:
+          type: object
+          properties:
+            faultstring:
+              type: string
+              example: Bad Request
+              description: |
+                The description of the error.
+            detail:
+              type: object
+              properties:
+                errorcode:
+                  type: string
+                  description: |
+                    The error code.
+                  example: The request contains bad syntax or cannot be fulfilled.
+    Unauthorized:
+      type: object
+      additionalProperties: false
+      description: |
+        The application is not authorised to use the requested grant type.
+      properties:
+        fault:
+          type: object
+          properties:
+            faultstring:
+              type: string
+              example: Invalid Client ID
+              description: |
+                The description of the error.
+            detail:
+              type: object
+              properties:
+                errorcode:
+                  type: string
+                  description: |
+                    The error code.
+                  example: keymanagement.service.invalid_client_id
+    Forbidden:
+      type: object
+      additionalProperties: false
+      description: |
+        An error response.
+      properties:
+        fault:
+          type: object
+          properties:
+            faultstring:
+              type: string
+              example: Forbidden
+              description: |
+                The description of the error.
+            detail:
+              type: object
+              properties:
+                errorcode:
+                  type: string
+                  description: |
+                    The error code.
+                  example: keymanagement.service.Forbidden
+    NotFound:
+      type: object
+      additionalProperties: false
+      description: |
+        An error response.
+      properties:
+        fault:
+          type: object
+          properties:
+            faultstring:
+              type: string
+              example: 'Unable to identify proxy for host - https_vhost and url:{requested url}'
+              description: |
+                The description of the error.
+            detail:
+              type: object
+              properties:
+                errorcode:
+                  type: string
+                  description: |
+                    The error code.
+                  example: messaging.adaptors.http.flow.ApplicationNotFound
+    MethodnotAllowed:
+      type: object
+      additionalProperties: false
+      description: |
+        An error response.
+      properties:
+        fault:
+          type: object
+          properties:
+            faultstring:
+              type: string
+              example: You are not allowed to call on this method.
+              description: |
+                The description of the error.
+            detail:
+              type: object
+              properties:
+                errorcode:
+                  type: string
+                  description: |
+                    The error code.
+                  example: messaging.adaptors.http.flow.MethodnotAllowed
+    InternalServerError:
+      type: object
+      additionalProperties: false
+      description: |
+        An error response.
+      properties:
+        fault:
+          type: object
+          properties:
+            faultstring:
+              type: string
+              example: steps.servicecallout.ExecutionFailed
+              description: |
+                The description of the error.
+            detail:
+              type: object
+              properties:
+                errorcode:
+                  type: string
+                  description: |
+                    The error code.
+                  example: Execution of ServiceCallout service_callout_v3_store failed. Reason - ResponseCode 404 is treated as error
+  securitySchemes:
+    BasicAuth:
+      type: http
+      description: Username and password encoded in base 64
+      scheme: basic

@@ -1,6 +1,6 @@
 openapi: '3.0.0'
 info:
-  title: 'Telenity DSP Northbound Subscription API'
+  title: 'Enkudo DSP Northbound Subscription API'
   description: |
     Enkudo DSP is Telenity’s next-generation digital services platform to monetize the 
     digital services and content served on top of the customer network. Enkudo DSP solution 
@@ -9,12 +9,131 @@ info:
     portal with a variety of payment options, on a revenue share business model.
     This API is for the consumption of Content Providers. It provides end-user subscription, 
     unsubscription, query information and notification interfaces for DSP. 
+    <br><br>
+    NGSSM's subscription API is inbound, meaning that, for this API, NGSSM acts as the server
+    and request direction is from the client to NGSSM. Subscription APIs include  methods: 
+    - Generate Authcode, 
+    - ReGenerate Authcode, 
+    - Create Subscription and 
+    - Cancel Subscription
+    - Query Subscriber Info 
+    As the names imply, Authcode methods are used to create a one-time password token at OTPS, 
+    Create Subscription is used to create an offer subscription at NGSSM, 
+    whereas Cancel Subscription is used to cancel an existing offer subscription on NGSSM
   version: '1.0'
 servers:
-  - url: https://api.server.test/v1
+  - url: 'https://api.enkudo-{customer}.com/v1/subscription'
+    description: Production server
+    variables:
+      customer:
+        default: demo
+        description: enkudo customer name
+  - url: 'https://api-test.enkudo-{customer}.com/v1/subscription'
+    description: Test server
+    variables:
+      customer:
+        default: demo
+        description: enkudo customer name.
 paths:
-  /subscriibe:
+  /authcode:
     post:
+      summary : Token Request
+      description: |
+        'Before issuing any requests to the endpoint, web applications need to be authenticated. 
+        For authentication, Client Credentials grant of OAuth 2.0 specification is used. 
+        Please refer to  for more information on OAuth.http://tools.ietf.org/html/rfc6749#section-4.4
+        The client authentication follows these steps:
+        - Client encodes its key and password into an encoded set of credentials.
+        - Client makes a request to OAuth/token?grant_type=client_credentials endpoint and 
+          passes the credentials information in the POST request.
+        - If successfully authenticated, client receives an access token in the response.
+        - Client includes this bearer token when making requests to the DCB API'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AccessTokenReq'
+        required: true
+      responses:
+        '200':
+          description: Successful Access Token Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokenRsp'
+  /authcode/{trxid}:
+    put:
+      description: | 
+        'Regenerate Auth Code API has the same basic functionality of Generate API with one caveat: 
+        It first invalidates the current Auth Code and only then generates a new random password 
+        and sends it to the application. The created is password is not sent to the subscriber.
+        The application can send the password to the subscriber by any means it prefers.
+        For Regenerate Auth Code API to be called successfully, Generate Auth Code must have been 
+        called first and there should be a valid Transaction ID from that API call'
+      parameters: 
+        - name: trxid
+          description: Transaction id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
+  /subscribe:
+    post:
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /unsubscribe:
+    post:
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /query/{msisdn}:
+    get:
+      description: ''
+      parameters:
+        - name: msisdn
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 20
+            pattern: '^[0-9]$'
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    AccessTokenReq:
+      type: object
+      required:
+        - grant_type
+      properties:
+        grant_type:
+          type: string
+          enum:
+            - client_credentials
+    AccessTokenRsp:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          description: Token that needs to be used by the clinet within expires_in operiod
+          type: string
+          maxLength: 20
+        token_type:
+          type: string
+          enum:
+            - Bearer
+        expires_in:
+          type: integer
+
