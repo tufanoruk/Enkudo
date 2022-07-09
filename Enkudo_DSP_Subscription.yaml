@@ -27,17 +27,19 @@ servers:
     variables:
       customer:
         default: demo
-        description: enkudo customer name
+        description: Enkudo customer name
   - url: 'https://api-test.enkudo-{customer}.com/v1/subscription'
     description: Test server
     variables:
       customer:
         default: demo
-        description: enkudo customer name.
+        description: Enkudo customer name.
+  - url: 'http://localhost/v1/subscription'
+    description: Development server
 paths:
   /authcode:
     post:
-      summary : Token Request
+      summary : Authorization Code Request
       description: |
         'Before issuing any requests to the endpoint, web applications need to be authenticated. 
         For authentication, Client Credentials grant of OAuth 2.0 specification is used. 
@@ -50,17 +52,23 @@ paths:
         - Client includes this bearer token when making requests to the DCB API'
       requestBody:
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/AccessTokenReq'
+              $ref: '#/components/schemas/AuthCodeReq'
         required: true
       responses:
         '200':
-          description: Successful Access Token Request
+          description: 'Successful Authorization Code Request'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AccessTokenRsp'
+                $ref: '#/components/schemas/AuthCodeRsp'
+        '403':
+          description: 'Not Allowed'
+        '404': 
+          description: 'Incalid Trasaction Id'
+        '500':
+          description: 'General Server Error'
   /authcode/{trxid}:
     put:
       description: | 
@@ -99,6 +107,7 @@ paths:
       description: ''
       parameters:
         - name: msisdn
+          description: Subscriber unique id
           in: path
           required: true
           schema:
@@ -110,30 +119,42 @@ paths:
           description: OK
 components:
   schemas:
-    AccessTokenReq:
+    AuthCodeReq:
       type: object
-      required:
-        - grant_type
       properties:
-        grant_type:
+        type:
+          description: 'Type of the generated Auth Code'
           type: string
           enum:
-            - client_credentials
-    AccessTokenRsp:
-      type: object
-      required:
-        - access_token
-        - token_type
-        - expires_in
-      properties:
-        access_token:
-          description: Token that needs to be used by the clinet within expires_in operiod
-          type: string
-          maxLength: 20
-        token_type:
-          type: string
-          enum:
-            - Bearer
-        expires_in:
+            - numeric
+            - alphanumeric
+        length: 
+          description: 'Length of the generated Auth Code'
           type: integer
-
+          minimum: 8
+          maximum: 32
+        template:
+          description: 'Template Message that is defined at the OTP module'
+          type: string
+        sender:
+          description: 'Sender address of the  AuthCode  SMS'
+          type: string
+          minLength: 8
+          maxLength: 256
+        target:
+          description: 'Recipient address that requested the  Auth Code'
+          type: string
+          minLength: 8
+          maxLength: 256
+      required:
+        - target
+    AuthCodeRsp:
+      type: object
+      properties:
+        trxid:
+          description: ''
+          type: string
+          minLength: 8
+          maxLength: 32
+      required:
+        - trxid

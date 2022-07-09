@@ -1,2 +1,4 @@
 knowledge/
 *.pdf
+*_src/
+.DS_Store
