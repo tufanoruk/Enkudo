@@ -30,8 +30,7 @@ fi
 SRC=$LANG"_src"
 
 $generator generate \
-    --api-name-suffix Enkudo_DSP \
     --generator-name $LANG \
+    --api-name-suffix Enkudo_DSP \
     --output $SRC \
     --input-spec $SPEC
-

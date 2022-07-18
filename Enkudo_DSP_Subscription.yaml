@@ -22,6 +22,8 @@ info:
     whereas Cancel Subscription is used to cancel an existing offer subscription on NGSSM
   version: '1.0'
 servers:
+  - url: 'http://localhost/v1/subscription'
+    description: Development server
   - url: 'https://api.enkudo-{customer}.com/v1/subscription'
     description: Production server
     variables:
@@ -34,11 +36,10 @@ servers:
       customer:
         default: demo
         description: Enkudo customer name.
-  - url: 'http://localhost/v1/subscription'
-    description: Development server
 paths:
   /authcode:
     post:
+      operationId: getAuthCode
       summary : Authorization Code Request
       description: |
         'Before issuing any requests to the endpoint, web applications need to be authenticated. 
@@ -71,6 +72,7 @@ paths:
           description: 'General Server Error'
   /authcode/{trxid}:
     put:
+      operationId: regenerateAuthCode
       description: | 
         'Regenerate Auth Code API has the same basic functionality of Generate API with one caveat: 
         It first invalidates the current Auth Code and only then generates a new random password 
@@ -90,6 +92,7 @@ paths:
           description: OK
   /subscribe:
     post:
+      operationId: subscribe
       description: ''
       parameters: []
       responses:
@@ -97,6 +100,7 @@ paths:
           description: OK
   /unsubscribe:
     post:
+      operationId: unsubscribe
       description: ''
       parameters: []
       responses:
@@ -104,6 +108,7 @@ paths:
           description: OK
   /query/{msisdn}:
     get:
+      operationId: getMSISDN
       description: ''
       parameters:
         - name: msisdn
