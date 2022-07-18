@@ -37,25 +37,24 @@ components:
       description: 'Unique transaction ID within the carrier system'
       type: string
       pattern: '^[a-zA-Z0-9]{1,50}$'
-
+    subscriptionId: 
+      description: ''
+      type: string 
+      maxLength: 32
+    serviceId: 
+      type: string
+      maxLength: 32
+    service:
+      type: object
+      properties:
+        serviceId:
+          $ref: '#/components/schemas/serviceId'
+        serviceName:
+          type: string        
 #
 # REQUEST BODIES
 #
 
-    SubscribeRequestBody:
-      type: object
-      properties:
-        Transactiond:
-          $ref: '#/components/schemas/trxid'
-        Channel:
-          $ref: '#/components/schemas/channel'
-        msisdn:
-          $ref: '#/components/schemas/msisdn'
-        offer:
-          type: string
-      required:
-        - Transactiond
-        - msisdn
 
     AuthCodeRequestBody:
       type: object
@@ -79,6 +78,39 @@ components:
           maxLength: 1024
       required:
         - target
+
+    SubscribeRequestBody:
+      type: object
+      properties:
+        Transactiond:
+          $ref: '#/components/schemas/trxid'
+        Channel:
+          $ref: '#/components/schemas/channel'
+        msisdn:
+          $ref: '#/components/schemas/msisdn'
+        offer:
+          type: string
+      required:
+        - Transactiond
+        - msisdn
+
+    UnsubscribeRequestBody:
+      type: object
+      properties:
+        Transactiond:
+          $ref: '#/components/schemas/trxid'
+        Channel:
+          $ref: '#/components/schemas/channel'
+        msisdn:
+          $ref: '#/components/schemas/msisdn'
+        offer:
+          type: string
+        inactivationReason:
+          type: string
+      required:
+        - Transactiond
+        - msisdn
+
 
     ErrorRsp:
       type: object

@@ -119,7 +119,7 @@ paths:
           name: RequestedServiceId
           description: 'id of requested service to subscribe'
           schema:
-            type: string
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/serviceId' 
       requestBody:
         $ref: '#/components/requestBodies/SubscribeRequestBody'
         required: true
@@ -140,14 +140,28 @@ paths:
   /unsubscribe:
     post:
       operationId: unsubscribe
-      description: ''
+      description: |
+        'Cancels the existing subscription of the customer identified with the parameters passed 
+        in the JSON body parameter offer'
       security:
         - BearerAuth: []
+      parameters:
+        - in: header 
+          name: RequestedServiceId
+          description: 'id of requested service to subscribe'
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/UnsubscribeRequestBody'
+        required: true
 
-      parameters: []
       responses:
         '200':
-          description: OK
+          description: 'Successfully unsubscribed from the given content'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnsubscribeRsp'
         '403':
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
         '404': 
@@ -157,10 +171,10 @@ paths:
   /query/{msisdn}:
     get:
       operationId: getMSISDN
-      description: ''
+      description: |
+        'Query the subscriptions of the customer identified with the msisdn passed in the URL.'
       security:
         - BearerAuth: []
-
       parameters:
         - name: msisdn
           in: path
@@ -169,7 +183,11 @@ paths:
             $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/msisdn' 
       responses:
         '200':
-          description: OK
+          description: 'Successfully retrived subscriber info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryRsp'
         '403':
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
         '404': 
@@ -185,7 +203,6 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-
   schemas:
     AuthCodeRsp:
       type: object
@@ -194,6 +211,54 @@ components:
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/trxid'
       required:
         - trxid
+    Subscription:
+      type: object
+      properties:
+        services:
+          description: 'List of the subscribed service unique names and IDs.'
+          type: array
+          items: 
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/service'
+            maxItems: 64
+        offer:
+          description: 'The unique name of an offer that is subscribed by the MSISDN'
+          type: string 
+          maxLength: 64
+        price:
+          description: 'The main price for the offer. Only applicable for NGSSM Service Offers'
+          type: integer
+          format: int32
+        startDate:
+          description: 'The first subscription start date'
+          type: string
+          format: date-time
+        state:
+          description: |
+            'The new state of service subscription. It can have the following values;
+            - ACTIVE = 3rd party application should provide service to subscriber.
+            - SUSPENDED = In case of charging failures, subscription is suspended. 3rd party
+            applications should notprovide service.
+            - INACTIVE = When subscription is finished, subscription state is changed
+            to INACTIVE. 3rd party application should not provide service to subscriber.
+            - INPROGRESS = This state indicates that subscription related operations are taking
+            place. 3rd party application should not provide service to subscriber.
+            - PENDING = This state indicates that consent is asked to subscriber and the
+            response is expected. 
+            
+            3rd party application should not provide service to subscriber.
+            3rd Party should provide service to subscriber only when state is ACTIVE. 
+            On all other cases, subscriber should not be served by 3rd party application.
+          enum:
+            - active
+            - suspended
+            - inactive 
+            - inprogress 
+            - pending
+      required:
+        - services
+        - startDate
+        - state
+
     RegenerateAuthCodeRsp:
       type: object
       properties:
@@ -274,19 +339,29 @@ components:
       type: object
       properties:
         subscriptionId:
-          type: string
-          maxLength: 64
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/subscriptionId'
       required:
         - subscriptionId
-
+    UnsubscribeRsp:
+      type: object
+      properties:
+        subscriptionId:
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/subscriptionId'
+      required:
+        - subscriptionId
+ 
+    QueryRsp:
+      type: object
+      properties:
+        subscriptions:
+          type: array
+          items: 
+            $ref: '#/components/schemas/Subscription'
+          maxItems: 64
+      required:
+        - subscriptions
+ 
   requestBodies:
-    SubscribeRequestBody:
-      description: ''
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/SubscribeRequestBody'
     AuthCodeRequestBody:
       description: ''
       required: true
@@ -294,4 +369,17 @@ components:
         application/json:
           schema:
             $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/AuthCodeRequestBody'
-
+    SubscribeRequestBody:
+      description: ''
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/SubscribeRequestBody'
+    UnsubscribeRequestBody:
+      description: ''
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/UnsubscribeRequestBody'
