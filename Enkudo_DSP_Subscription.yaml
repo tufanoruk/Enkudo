@@ -66,13 +66,26 @@ paths:
                 $ref: '#/components/schemas/AuthCodeRsp'
         '403':
           description: 'Not Allowed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRsp'
         '404': 
           description: 'Incalid Trasaction Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRsp'
         '500':
           description: 'General Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRsp'
   /authcode/{trxid}:
     put:
       operationId: regenerateAuthCode
+      summary: Regenerate Auth-Code
       description: | 
         'Regenerate Auth Code API has the same basic functionality of Generate API with one caveat: 
         It first invalidates the current Auth Code and only then generates a new random password 
@@ -82,18 +95,40 @@ paths:
         called first and there should be a valid Transaction ID from that API call'
       parameters: 
         - name: trxid
-          description: Transaction id
           in: path
-          required: true
           schema:
-            type: integer
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/trxid'
+          required: true
       responses:
         '200':
-          description: OK
+          description: 'Successful Authorization Code Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegenerateAuthCodeRsp'
+        '403':
+          description: 'Not Allowed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRsp'
+        '404': 
+          description: 'Incalid Trasaction Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRsp'
+        '500':
+          description: 'General Server Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRsp'
   /subscribe:
     post:
       operationId: subscribe
-      description: ''
+      summary: Create Subscription
+      description: 'Subscribes the customer identified with the parameters passed in the JSON body parameter "offer"'
       parameters: []
       responses:
         '200':
@@ -112,13 +147,10 @@ paths:
       description: ''
       parameters:
         - name: msisdn
-          description: Subscriber unique id
           in: path
           required: true
           schema:
-            type: string
-            maxLength: 20
-            pattern: '^[0-9]$'
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/msisdn' 
       responses:
         '200':
           description: OK
@@ -128,38 +160,106 @@ components:
       type: object
       properties:
         type:
-          description: 'Type of the generated Auth Code'
-          type: string
-          enum:
-            - numeric
-            - alphanumeric
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/type' 
         length: 
           description: 'Length of the generated Auth Code'
           type: integer
-          minimum: 8
-          maximum: 32
+          format: int32
         template:
           description: 'Template Message that is defined at the OTP module'
           type: string
         sender:
-          description: 'Sender address of the  AuthCode  SMS'
-          type: string
-          minLength: 8
-          maxLength: 256
+          description: 'Sender address of the  AuthCode SMS'
+          type: string      
+          maxLength: 1024
         target:
-          description: 'Recipient address that requested the  Auth Code'
+          description: 'Recipient address that requested the Auth Code'
           type: string
-          minLength: 8
-          maxLength: 256
+          maxLength: 1024
       required:
         - target
     AuthCodeRsp:
       type: object
       properties:
         trxid:
-          description: ''
-          type: string
-          minLength: 8
-          maxLength: 32
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/trxid'
       required:
         - trxid
+    RegenerateAuthCodeRsp:
+      type: object
+      properties:
+        otp:
+          description: 'Generated OTP, empty, not shared withthe Client'
+          type: string
+          maxLength: 256
+        trxid:
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/trxid' 
+        type:
+          description: 'Type of the generated Auth Code'
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/type' 
+        length: 
+          description: 'Generated OTP length'
+          type: integer
+          format: int32
+        channel:
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/channel' 
+        template:
+          description: 'Generated OTP SMS template. Always"default"'
+          type: string
+          default: 'default'
+        validityPeriodInSeconds:
+          description: 'OTP validity period in seconds'
+          type: integer
+          format: int32
+        createdAt:
+          description: 'OTP creation time in miliseconds from Unix epoch(?) in local time'
+          type: integer
+          format: int64
+        expiresAt:
+          description: 'OTP expiry time in miliseconds from Unix epoch(?) in local time'
+          type: integer
+          format: int64
+        maxVerificationAttempts:
+          description: |
+            'Maximum number of attempts allowed for OTP verification to the Client 
+            (and so the customer).'
+          type: integer
+          format: int32
+        remainingVerificationAttempts:
+          description: |
+            'Remaining number of attempts allowed for OTP verification to the Client 
+            (and so the customer).'
+          type: integer
+          format: int32
+        maxRegenerationAttempts:
+          description: |
+            'Maximum number of attempts allowed for OTP regeneration to the Client 
+            (and so thecustomer)'
+          type: integer
+          format: int32
+        remainingRegenerationAttempts:
+          description: |
+            'Remaining number of attempts allowed for OTP regeneration to the Client 
+            (and so thecustomer)'
+          type: integer
+          format: int32
+        minRegenerationDelayInSeconds:
+          description: |
+            'Minimum delay in seconds before the Client can trigger OTP renegeneration'
+          type: integer
+          format: int32
+    ErrorRsp:
+      type: object
+      properties:
+        code:
+          description: 'Enkudo API ErrorRspure code. See API document descriptions'
+          type: string
+          maxLength: 8
+          pattern: '^[0-9]$'
+        message:
+          description: 'Human readble ErrorRsp message'
+          type: string
+          maxLength: 256
+
+
+

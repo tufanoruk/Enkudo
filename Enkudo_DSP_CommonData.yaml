@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  version: '1.0.0'
+  title: 'Enkudo DSP Common Data Types'
+  description: |
+    Common Data Types for Service Based Interfaces.
+
+
+paths: {}
+components:
+  schemas:
+#
+# Common Data Types for  Generic usage definitiones 
+#
+
+#
+# COMMON SIMPLE DATA TYPES
+#
+
+    type:
+      description: 'OTP type'
+      enum:
+        - numeric
+        - alphanumeric
+    channel:
+      description: 'OTP delivery channel'
+      enum:
+        - sms
+        - ussdb
+        - web
+    msisdn:
+      description: 'MSISDN of the customer (subscriber)'
+      type: string
+      maxLength: 20
+      pattern: '^[0-9]$'
+    trxid:
+      description: 'Unique transaction ID within the carrier system'
+      type: string
+      pattern: '^[a-zA-Z0-9]{1,50}$'
+        
+
+
