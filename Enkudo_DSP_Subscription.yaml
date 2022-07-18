@@ -52,10 +52,7 @@ paths:
         - If successfully authenticated, client receives an access token in the response.
         - Client includes this bearer token when making requests to the DCB API'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthCodeReq'
+        $ref: '#/components/requestBodies/AuthCodeRequestBody'
         required: true
       responses:
         '200':
@@ -65,23 +62,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthCodeRsp'
         '403':
-          description: 'Not Allowed'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorRsp'
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
         '404': 
-          description: 'Incalid Trasaction Id'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorRsp'
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
         '500':
-          description: 'General Server Error'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorRsp'
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'
   /authcode/{trxid}:
     put:
       operationId: regenerateAuthCode
@@ -107,44 +92,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegenerateAuthCodeRsp'
         '403':
-          description: 'Not Allowed'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorRsp'
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
         '404': 
-          description: 'Incalid Trasaction Id'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorRsp'
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
         '500':
-          description: 'General Server Error'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorRsp'
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'
   /subscribe:
     post:
       operationId: subscribe
       summary: Create Subscription
       description: 'Subscribes the customer identified with the parameters passed in the JSON body parameter "offer"'
-      parameters: []
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: header 
+          name: authCode
+          description: '>>>>>Authorization code receveid be get/regenerateAuthCode'
+          schema:
+           $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/trxid'
+        - in: header
+          name: trxid
+          description: '>>>>>>Authorization code receveid be get/regenerateAuthCode'
+          schema:
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/trxid'
+        - in: header
+          name: RequestedServiceId
+          description: 'id of requested service to subscribe'
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/SubscribeRequestBody'
+        required: true
       responses:
         '200':
-          description: OK
+          description: 'Successfully subscribed to the requested content'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscribeRsp'
+        '403':
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
+        '404': 
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
+        '500':
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'     
+  
   /unsubscribe:
     post:
       operationId: unsubscribe
       description: ''
+      security:
+        - BearerAuth: []
+
       parameters: []
       responses:
         '200':
           description: OK
+        '403':
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
+        '404': 
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
+        '500':
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'
   /query/{msisdn}:
     get:
       operationId: getMSISDN
       description: ''
+      security:
+        - BearerAuth: []
+
       parameters:
         - name: msisdn
           in: path
@@ -154,30 +170,23 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
+        '404': 
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
+        '500':
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'
+
 components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    BearerAuth:
+      type: http
+      scheme: bearer
+
   schemas:
-    AuthCodeReq:
-      type: object
-      properties:
-        type:
-          $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/type' 
-        length: 
-          description: 'Length of the generated Auth Code'
-          type: integer
-          format: int32
-        template:
-          description: 'Template Message that is defined at the OTP module'
-          type: string
-        sender:
-          description: 'Sender address of the  AuthCode SMS'
-          type: string      
-          maxLength: 1024
-        target:
-          description: 'Recipient address that requested the Auth Code'
-          type: string
-          maxLength: 1024
-      required:
-        - target
     AuthCodeRsp:
       type: object
       properties:
@@ -248,18 +257,41 @@ components:
             'Minimum delay in seconds before the Client can trigger OTP renegeneration'
           type: integer
           format: int32
-    ErrorRsp:
+      required:
+        - otp
+        - trxid
+        - type
+        - length
+        - channel
+        - template
+        - validityPeriodInSeconds
+        - createdAt
+        - expiresAt
+        - maxVerificationAttempts
+        - remainingRegenerationAttempts
+        - minRegenerationDelayInSeconds
+    SubscribeRsp:
       type: object
       properties:
-        code:
-          description: 'Enkudo API ErrorRspure code. See API document descriptions'
+        subscriptionId:
           type: string
-          maxLength: 8
-          pattern: '^[0-9]$'
-        message:
-          description: 'Human readble ErrorRsp message'
-          type: string
-          maxLength: 256
+          maxLength: 64
+      required:
+        - subscriptionId
 
-
+  requestBodies:
+    SubscribeRequestBody:
+      description: ''
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/SubscribeRequestBody'
+    AuthCodeRequestBody:
+      description: ''
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/AuthCodeRequestBody'
 

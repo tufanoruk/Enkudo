@@ -2,6 +2,7 @@
 #
 
 generator="openapi-generator"
+validator="./validate.sh"
 
 Usage="\
 Usage: gencode.sh <YAML_specification> <Language> \n
@@ -20,7 +21,8 @@ LANG=$2
 
 echo "Generating $LANG code from $SPEC"
 
-$generator validate -i $SPEC
+$validator $SPEC
+#$generator validate -i $SPEC
 if [ $? -ne 0 ] 
 then
     echo "Invalid $SPEC file"

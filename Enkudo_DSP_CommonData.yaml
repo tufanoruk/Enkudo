@@ -37,6 +37,92 @@ components:
       description: 'Unique transaction ID within the carrier system'
       type: string
       pattern: '^[a-zA-Z0-9]{1,50}$'
-        
+
+#
+# REQUEST BODIES
+#
+
+    SubscribeRequestBody:
+      type: object
+      properties:
+        Transactiond:
+          $ref: '#/components/schemas/trxid'
+        Channel:
+          $ref: '#/components/schemas/channel'
+        msisdn:
+          $ref: '#/components/schemas/msisdn'
+        offer:
+          type: string
+      required:
+        - Transactiond
+        - msisdn
+
+    AuthCodeRequestBody:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/type' 
+        length: 
+          description: 'Length of the generated Auth Code'
+          type: integer
+          format: int32
+        template:
+          description: 'Template Message that is defined at the OTP module'
+          type: string
+        sender:
+          description: 'Sender address of the  AuthCode SMS'
+          type: string      
+          maxLength: 1024
+        target:
+          description: 'Recipient address that requested the Auth Code'
+          type: string
+          maxLength: 1024
+      required:
+        - target
+
+    ErrorRsp:
+      type: object
+      properties:
+        code:
+          description: 'Enkudo API Error code. See API document descriptions'
+          type: string
+          maxLength: 8
+          pattern: '^[0-9]$'
+        errorCode:
+          description: 'Enkudo API Error code. See API document descriptions'
+          type: string
+          maxLength: 8
+          pattern: '^[0-9]$'
+        message:
+          description: 'Human readble ErrorRsp message'
+          type: string
+          maxLength: 256
+      required:
+        - code
+        - message
+
+#
+# COMMON RESPONSES
+#
+
+  responses:
+    '403':
+      description: 'Not Allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorRsp'
+    '404':
+      description: 'Not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorRsp'
+    '500':
+      description: 'General server error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorRsp'
 
 
