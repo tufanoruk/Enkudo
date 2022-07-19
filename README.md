@@ -42,7 +42,7 @@ To generate say go client code for Enkudo Subscription NBI,
 
 This command creartes a "go_src" directory with client API library in golang. There is also a simple go client project (go-enkudo-client) which utilizes this openapi-generator generated client API library.
 
-To get the list of languages that openapi-generator generated client API library and server stab
+To get the list of languages that openapi-generator can generate code for client API library and server stab,
 
 ```bash
 % openapi-generator list
