@@ -52,6 +52,8 @@ paths:
           passes the credentials information in the POST request.
         - If successfully authenticated, client receives an access token in the response.
         - Client includes this bearer token when making requests to the DCB API'
+      security:
+        - BarerAuth: []
       requestBody:
         $ref: '#/components/requestBodies/AuthCodeRequestBody'
         required: true
@@ -79,6 +81,8 @@ paths:
         The application can send the password to the subscriber by any means it prefers.
         For Regenerate Auth Code API to be called successfully, Generate Auth Code must have been 
         called first and there should be a valid Transaction ID from that API call'
+      security:
+        - BarerAuth: []
       parameters: 
         - name: trxid
           in: path
@@ -139,7 +143,7 @@ paths:
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'     
   
   /unsubscribe:
-    post:
+    put:
       operationId: unsubscribe
       description: |
         'Cancels the existing subscription of the customer identified with the parameters passed 
