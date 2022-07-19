@@ -17,6 +17,12 @@ fi
 
 INF=$1
 
+#echo "===== Validating with openapi-generator ====="
+#openapi-generator validate -i $INF
+
+#echo "===== Validating with openapi-spec-validator ====="
+#openapi-spec-validator $INF
+
 VALIDATORS=("openapi-generator validate -i" 
             "openapi-spec-validator ")
 
