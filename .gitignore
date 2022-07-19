@@ -2,3 +2,4 @@ knowledge/
 *.pdf
 *_src/
 .DS_Store
+Enkudo_DSP_OAuth.yaml
