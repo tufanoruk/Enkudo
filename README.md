@@ -34,13 +34,13 @@ To validate a YAML file,
 ./validate.sh Enkudo_DSP_Subscription.yaml
 ```
 
-To generate say go client code for Ekbudo Subscription NBI,
+To generate say go client code for Enkudo Subscription NBI,
 
 ```bash
 ./gencode.sh Enkudo_DSP_Subscription.yaml go
 ```
 
-This command creartes a "go_src" directory with client API library in golang. There is also a simple go client project (go-enkudo-clinet) which utilizes this openapi-generator generated clinet API library.
+This command creartes a "go_src" directory with client API library in golang. There is also a simple go client project (go-enkudo-client) which utilizes this openapi-generator generated client API library.
 
 To get the list of languages that openapi-generator generated client API library and server stab
 
