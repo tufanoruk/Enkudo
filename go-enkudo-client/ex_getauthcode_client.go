@@ -36,11 +36,11 @@ import (
 )
 
 func main() {
-	authCodeReq := *openapiclient.NewAuthCodeReq("Target_example") // AuthCodeReq |
+	authCodeReq := *openapiclient.NewAuthCodeRequestBody("Target_example") // AuthCodeRequest
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.DefaultEnkudoDSP.GetAuthCode(context.Background()).AuthCodeReq(authCodeReq).Execute()
+	resp, r, err := apiClient.DefaultEnkudoDSP.GetAuthCode(context.Background()).AuthCodeRequestBody(authCodeReq).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DefaultEnkudoDSP.GetAuthCode``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)

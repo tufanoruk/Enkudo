@@ -17,12 +17,13 @@ info:
     - Create Subscription and 
     - Cancel Subscription
     - Query Subscriber Info 
+
     As the names imply, Authcode methods are used to create a one-time password token at OTPS, 
     Create Subscription is used to create an offer subscription at NGSSM, 
     whereas Cancel Subscription is used to cancel an existing offer subscription on NGSSM
   version: '1.0'
 servers:
-  - url: 'http://localhost/v1/subscription'
+  - url: 'http://localhost:8080/v1/subscription'
     description: Development server
   - url: 'https://api.enkudo-{customer}.com/v1/subscription'
     description: Production server
