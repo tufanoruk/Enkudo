@@ -31,7 +31,7 @@ components:
       description: ''
       enum:
         - active
-        - suspended
+        - suspend
         - inactive
     serviceNotificationType:
       description: ''
