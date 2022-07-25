@@ -141,7 +141,35 @@ paths:
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
         '500':
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'     
+        default:
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/default'     
   
+      callbacks:
+        onSubscriptionStateChangeEvent:
+          '{$request.body#/subStateChangeNotificationUri}':
+            post:
+              parameters:
+                - name: Content-Encoding
+                  in: header
+                  description: Content-Encoding, described in IETF RFC 7231
+                  schema:
+                    type: string
+              requestBody:
+                  $ref: '#/components/requestBodies/NotificationBody'
+              responses:
+                '200':
+                  description: Expected response to a successful notification processing
+                '403':
+                  $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/403'
+                '404': 
+                  $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
+                '500':
+                  $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'
+                default:
+                  $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/default'   
+
+
+
   /unsubscribe:
     put:
       operationId: unsubscribe
@@ -173,6 +201,8 @@ paths:
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
         '500':
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'
+        default:
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/default'   
   /query/{msisdn}:
     get:
       operationId: getMSISDN
@@ -199,7 +229,8 @@ paths:
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/404'
         '500':
           $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/500'
-
+        default:
+          $ref: 'Enkudo_DSP_CommonData.yaml#/components/responses/default'   
 components:
   securitySchemes:
     BasicAuth:
@@ -388,3 +419,11 @@ components:
         application/json:
           schema:
             $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/UnsubscribeRequestBody'
+
+    NotificationBody:
+      description: 'Notification Payload'
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: 'Enkudo_DSP_CommonData.yaml#/components/schemas/NotificationBody'

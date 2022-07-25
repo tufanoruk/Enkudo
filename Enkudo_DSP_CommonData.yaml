@@ -16,7 +16,6 @@ components:
 #
 # COMMON SIMPLE DATA TYPES
 #
-
     type:
       description: 'OTP type'
       enum:
@@ -28,22 +27,38 @@ components:
         - sms
         - ussdb
         - web
+    offerState:
+      description: ''
+      enum:
+        - active
+        - suspended
+        - inactive
+    serviceNotificationType:
+      description: ''
+      enum:
+        - subscribed
+        - unsubscribed
+        - reactivated
+        - suspended
+        - notrenewed
     msisdn:
       description: 'MSISDN of the customer (subscriber)'
       type: string
       maxLength: 20
       pattern: '^[0-9]$'
     trxid:
-      description: 'Unique transaction ID within the carrier system'
+      description: | 
+        'Unique transaction ID within the carrier system
+        @@@ It would be better if this can be RFC 4122 uuid'
       type: string
       pattern: '^[a-zA-Z0-9]{1,50}$'
     subscriptionId: 
       description: ''
       type: string 
-      maxLength: 32
+      format: uuid
     serviceId: 
       type: string
-      maxLength: 32
+      format: uuid
     service:
       type: object
       properties:
@@ -54,8 +69,6 @@ components:
 #
 # REQUEST BODIES
 #
-
-
     AuthCodeRequestBody:
       type: object
       properties:
@@ -78,7 +91,6 @@ components:
           maxLength: 1024
       required:
         - target
-
     SubscribeRequestBody:
       type: object
       properties:
@@ -90,10 +102,13 @@ components:
           $ref: '#/components/schemas/msisdn'
         offer:
           type: string
+        subStateChangeNotificationUri:
+          description: | 
+            'Callback API to inform Enkudo Subscription service about subscriber state change'
+          type: string
       required:
         - Transactiond
         - msisdn
-
     UnsubscribeRequestBody:
       type: object
       properties:
@@ -110,8 +125,77 @@ components:
       required:
         - Transactiond
         - msisdn
-
-
+    NotificationBody:
+      type: object
+      properties:
+        subscriptionId:
+          $ref:  '#/components/schemas/subscriptionId'
+        msisdn:
+          $ref: '#/components/schemas/msisdn'
+        state:
+          $ref: '#/components/schemas/offerState'
+        offerId:
+          type: string
+        offerName:
+          type: string
+        transactionId:
+          $ref: '#/components/schemas/trxid'
+        serviceNotificationType:
+          $ref: '#/components/schemas/serviceNotificationType'
+        serviceId:
+          $ref: '#/components/schemas/serviceId'
+        serviceName: 
+          type: string
+        isRenewal:
+          type: boolean
+        failureReason:
+          type: string
+        subscriptionStartDate:
+          description: 'Date format must be RFC3339'
+          type: string
+          format: date
+        subscriptionEndDate:
+          description: 'Date format must be RFC3339'
+          type: string
+          format: date
+        nextChargingDate:
+          description: 'Date format must be RFC3339'
+          type: string
+          format: date
+        lastRenewalDate:
+          description: 'Date format must be RFC3339'
+          type: string
+          format: date
+        channelType:
+          $ref: '#/components/schemas/channel'
+        chargingPeriod:
+          description: 'Period is in days'
+          type: integer
+          format: int32
+        chagedAmount:
+          description: 'local currrency'
+          type: integer
+          format: int32
+        inTrial:
+          description: 'It denotes that this trial subscription completed and paid one started' 
+          type: boolean
+        subscriptionCounter:
+          description: | 
+            'It denotes the total subscription count and increases each time subscription is created'
+          type: integer
+          format: int32
+        requestDate:
+          description: | 
+            'Date format must be RFC3339
+            It denotes the date of the latest request and changes each time subscription is created'
+          type: string
+          format: date
+      required:
+        - msisdn
+        - offerId
+        - offerName
+        - transactionId
+        - serviceNotificationType 
     ErrorRsp:
       type: object
       properties:
@@ -136,7 +220,6 @@ components:
 #
 # COMMON RESPONSES
 #
-
   responses:
     '403':
       description: 'Not Allowed'
@@ -156,5 +239,5 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorRsp'
-
-
+    default:
+      description: Generic Error
