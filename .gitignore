@@ -1,5 +1,6 @@
 knowledge/
 *.pdf
 *_src/
+!go-server_src/
 .DS_Store
 Enkudo_DSP_OAuth.yaml
