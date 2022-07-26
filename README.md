@@ -47,3 +47,18 @@ To get the list of languages that openapi-generator can generate code for client
 ```bash
 % openapi-generator list
 ```
+
+There are sample go sever and client prograns utilizing generated code by openapi-generator.
+
+- go-server_src is the generated server code directory. It includes go.mod and main.go files which are modified from the generated code an prevented from overwritten following code generations.
+- go-enkudo-client is contains a very simple client implementation that uses go_src openapi-generator generated client API library.
+ 
+Sample go server executeable is generated automatically upon server code generation. And can be run directly. It servs APIs but returns "unimplemented" failure.
+
+```bash
+% ./gencode.sh Enkudo_DSP_Subscription.yaml go-server
+% cd go-server_src
+% ./enkudo-dsp-go-server
+```
+
+Sample go file in go-enkudo-client explanis how to prepare, build and run the client.
