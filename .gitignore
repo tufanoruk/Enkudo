@@ -2,6 +2,7 @@ knowledge/
 *.pdf
 *_src/
 .DS_Store
+*.log
 Enkudo_DSP_OAuth.yaml
 !go-server_src/
 go-server_src/.openapi-generator
